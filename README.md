@@ -1,5 +1,3 @@
-# NexTrial — Final README.md
-
 # NexTrial
 
 > AI-Powered Clinical Trial Management System with Intelligent Participant Dropout Risk Prediction
@@ -33,8 +31,8 @@ Clinical trials generate large volumes of participant and operational data that 
 
 ## Tech Stack
 
-| **Layer** | **Technology** |
-|:----------|:---------------|
+| Layer | Technology |
+|--------|------------|
 | Frontend | React.js, Tailwind CSS |
 | Backend | Node.js, Express.js |
 | Database | MongoDB |
@@ -42,6 +40,8 @@ Clinical trials generate large volumes of participant and operational data that 
 | Authentication | JWT |
 | Deployment | Docker & Docker Compose |
 | Version Control | Git & GitHub |
+
+---
 
 ## System Architecture
 
@@ -55,6 +55,7 @@ MongoDB + Random Forest ML Model
 ↓
 Executive Analytics Dashboard
 
+---
 
 ## AI Module
 
@@ -79,7 +80,7 @@ The model predicts the likelihood of participant dropout and displays the result
 
 ## Project Structure
 
-text
+```text
 NexTrial/
 │
 ├── client/                  # React Frontend
@@ -90,19 +91,24 @@ NexTrial/
 ├── docker-compose.yml
 ├── .gitignore
 └── README.md
+```
+
+---
 
 ## Getting Started
 
 ### Clone Repository
 
-bash
+```bash
 git clone https://github.com/VaishnaviAmeriya-git/NexTrial.git
 cd NexTrial
+```
 
 ### Run with Docker
 
-bash
+```bash
 docker-compose up --build
+```
 
 ### Local Development
 
@@ -113,6 +119,7 @@ docker-compose up --build
 | MongoDB | 27017 |
 | AI Service | 8000 |
 
+---
 
 ## 8-Week Development Roadmap
 
@@ -127,6 +134,7 @@ docker-compose up --build
 | 7 | Testing & Docker Deployment |
 | 8 | Documentation & Final Demo |
 
+---
 
 ## Expected Outcomes
 
@@ -136,6 +144,7 @@ docker-compose up --build
 - Reduced manual record management
 - Explainable machine learning for healthcare research
 
+---
 
 ## Future Scope
 
@@ -143,6 +152,15 @@ docker-compose up --build
 - FHIR/ABDM Integration
 - LLM-based Protocol Assistant
 - Advanced Pharmacovigilance Analytics
+
+---
+
+## Team
+
+**Department of Information Technology**  
+Acropolis Institute of Technology & Research
+
+---
 
 ## License
 
