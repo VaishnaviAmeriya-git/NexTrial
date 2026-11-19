@@ -34,7 +34,7 @@ class CDISCService {
       USUBJID: `${studyId}-${p.subjectId}`,
       SUBJID: p.subjectId,
       AGE: p.age,
-      SEX: p.sex.charAt(0).toUpperCase(),
+      SEX: p.sex ? p.sex.charAt(0).toUpperCase() : 'U',
       ARM: p.arm,
       ACTARM: p.arm,
       ENRLDT: p.enrolledAt ? new Date(p.enrolledAt).toISOString().split('T')[0] : '',

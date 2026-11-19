@@ -185,7 +185,7 @@ class CodingService {
    * Auto-suggest MedDRA coding for a verbatim AE description
    */
   static suggestCoding(verbatimTerm) {
-    if (!verbatimTerm) {
+    if (!verbatimTerm || typeof verbatimTerm !== 'string') {
       return {
         soc: 'General disorders and administration site conditions',
         pt: 'Fatigue',
@@ -193,7 +193,7 @@ class CodingService {
         matched: false,
       };
     }
-    const q = verbatimTerm.toLowerCase();
+    const q = verbatimTerm.toLowerCase().trim();
     const match = DEMO_MEDDRA_DICTIONARY.find(item => q.includes(item.pt.toLowerCase()));
     if (match) {
       return { ...match, matched: true };

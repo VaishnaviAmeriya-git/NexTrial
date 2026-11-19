@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 async function getMlUrl() {
-  const candidates = [process.env.ML_SERVICE_URL, 'http://127.0.0.1:8000', 'http://localhost:8000'].filter(Boolean);
+  const candidates = [...new Set([process.env.ML_SERVICE_URL, 'http://127.0.0.1:8000', 'http://localhost:8000'].filter(Boolean))];
   for (const url of candidates) {
     try {
       const r = await axios.get(`${url}/health`, { timeout: 800 });

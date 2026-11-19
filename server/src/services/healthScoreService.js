@@ -26,9 +26,11 @@ async function calculateTrialHealthScore(trial) {
   // Determine expected enrolled by now based on trial duration and target
   let expectedByNow = trial.targetEnrollment;
   if (trial.startDate && trial.expectedEnrollmentDate) {
-    const totalDuration = new Date(trial.expectedEnrollmentDate) - new Date(trial.startDate);
-    const elapsed = Date.now() - new Date(trial.startDate);
-    if (totalDuration > 0 && elapsed > 0) {
+    const startMs = new Date(trial.startDate).getTime();
+    const endMs = new Date(trial.expectedEnrollmentDate).getTime();
+    const totalDuration = endMs - startMs;
+    const elapsed = Date.now() - startMs;
+    if (!isNaN(totalDuration) && !isNaN(elapsed) && totalDuration > 0 && elapsed > 0) {
       const progressFraction = Math.min(1.0, elapsed / totalDuration);
       expectedByNow = Math.max(1, Math.round(trial.targetEnrollment * progressFraction));
     }

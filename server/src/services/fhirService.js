@@ -49,15 +49,15 @@ class FHIRService {
             { system: 'http://nextrial.org/subject-id', value: p.subjectId },
           ],
           active: p.status !== 'Withdrawn',
-          gender: p.sex.toLowerCase(),
+          gender: p.sex ? p.sex.toLowerCase() : 'unknown',
           extension: [
             {
               url: 'http://nextrial.org/fhir/StructureDefinition/ayurveda-prakriti',
-              valueString: p.ayurveda.prakriti,
+              valueString: p.ayurveda?.prakriti || 'sama',
             },
             {
               url: 'http://nextrial.org/fhir/StructureDefinition/ayurvedic-diagnosis',
-              valueString: p.ayurveda.ayurvedicDiagnosis,
+              valueString: p.ayurveda?.ayurvedicDiagnosis || 'Unspecified',
             },
           ],
         },
@@ -142,7 +142,7 @@ class FHIRService {
           status: 'final',
           code: { text: `Visit ${v.visitNo} Attendance Assessment` },
           subject: { reference: `urn:uuid:patient-${v.participantId}` },
-          effectiveDateTime: (v.actualDate || v.scheduledDate).toISOString(),
+          effectiveDateTime: new Date(v.actualDate || v.scheduledDate || Date.now()).toISOString(),
           valueString: v.status,
           note: v.notes ? [{ text: v.notes }] : undefined,
         },
