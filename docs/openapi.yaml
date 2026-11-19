@@ -1,0 +1,872 @@
+openapi: 3.0.3
+info:
+  title: NexTrial CTMS API
+  description: >-
+    AI-enabled Clinical Trial Management System for Ayurvedic Research.
+    Aligned with Smart India Hackathon PS 26046 (AIIA Clinical Trials Dashboard).
+    All data is synthetic. GCP-aligned, SDTM-inspired, FHIR R4 JSON export prototype.
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local API Server
+paths:
+  /health:
+    get:
+      summary: Service health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                  services:
+                    type: object
+                    properties:
+                      database:
+                        type: string
+                      mlService:
+                        type: string
+
+  /auth/login:
+    post:
+      summary: Authenticate user credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+        '401':
+          description: Invalid credentials
+        '423':
+          description: Account locked due to failed attempts
+
+  /auth/refresh:
+    post:
+      summary: Refresh access token using httpOnly cookie
+      responses:
+        '200':
+          description: Access token refreshed
+        '401':
+          description: Refresh token invalid or expired
+
+  /auth/logout:
+    post:
+      summary: Terminate session and clear cookie
+      responses:
+        '200':
+          description: Logged out successfully
+
+  /auth/me:
+    get:
+      summary: Get currently authenticated user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+
+  /auth/change-password:
+    post:
+      summary: Change password
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        '200':
+          description: Password updated
+
+  /users:
+    get:
+      summary: List users (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        '200':
+          description: Paginated users list
+    post:
+      summary: Create new user (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: User created
+
+  /users/{id}:
+    patch:
+      summary: Update user attributes or permissions (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: User updated
+
+  /trials:
+    get:
+      summary: List clinical trials accessible to user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of trials
+    post:
+      summary: Create a clinical trial (admin or coordinator)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrialInput'
+      responses:
+        '201':
+          description: Trial created
+
+  /trials/{id}:
+    get:
+      summary: Get trial detail
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Trial detail
+    patch:
+      summary: Update trial details or status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Trial updated
+
+  /trials/{id}/summary:
+    get:
+      summary: Get trial enrollment and milestone summary
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Summary metrics
+
+  /trials/{id}/health-score:
+    get:
+      summary: Compute Trial Health Score (THS) with 5-part breakdown (E, R, C, S, Q)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Trial Health Score calculation and component terms
+
+  /trials/{id}/kpis:
+    get:
+      summary: Get trial key performance indicators
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: KPIs
+
+  /trials/{id}/ethics:
+    get:
+      summary: List ethics committee approvals
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of ethics approvals
+    post:
+      summary: Submit or record ethics approval
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Ethics approval saved
+
+  /trials/{id}/ctri:
+    put:
+      summary: Update CTRI registration details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [number, registeredAt, prospective]
+              properties:
+                number:
+                  type: string
+                  example: CTRI/2026/03/048123
+                registeredAt:
+                  type: string
+                  format: date
+                prospective:
+                  type: boolean
+      responses:
+        '200':
+          description: CTRI details updated
+
+  /trials/{id}/participants:
+    get:
+      summary: List trial participants
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of participants
+    post:
+      summary: Register participant with Ayurveda profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipantInput'
+      responses:
+        '201':
+          description: Participant registered
+
+  /participants/{id}:
+    get:
+      summary: Get participant profile and Ayurveda details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Participant details
+    patch:
+      summary: Update participant record
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Participant updated
+
+  /participants/{id}/consent:
+    post:
+      summary: Record or withdraw informed consent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Consent recorded
+
+  /participants/{id}/status:
+    post:
+      summary: Update participant status (e.g. Enrolled, Completed, Withdrawn)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status updated
+
+  /participants/{id}/visits:
+    get:
+      summary: List participant visit schedule
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Visit schedule
+    post:
+      summary: Generate visit schedule based on trial visit protocol
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Visits generated
+
+  /participants/{id}/visits/generate:
+    post:
+      summary: Generate visit schedule from trial protocol definition
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Visits created
+
+  /visits/{id}:
+    patch:
+      summary: Update visit outcome (Completed, Missed, Out-of-window)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Visit updated
+
+  /trials/{id}/adverse-events:
+    get:
+      summary: List adverse events in trial
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of AEs
+    post:
+      summary: Log an adverse event
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdverseEventInput'
+      responses:
+        '201':
+          description: Adverse event logged
+
+  /adverse-events/{id}:
+    patch:
+      summary: Update AE causality, seriousness, or outcome
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: AE updated
+
+  /adverse-events/{id}/code:
+    post:
+      summary: Assign MedDRA SOC/PT and Ayurvedic formulation codes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: AE coded
+
+  /trials/{id}/safety-signals:
+    get:
+      summary: DSMB aggregate safety signals and SAE incidence
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Aggregate safety signals
+
+  /trials/{id}/deviations:
+    get:
+      summary: List protocol deviations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Protocol deviations
+    post:
+      summary: Log a protocol deviation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Deviation logged
+
+  /trials/{id}/queries:
+    get:
+      summary: List data queries
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Queries list
+    post:
+      summary: Raise a data query
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Query raised
+
+  /queries/{id}:
+    patch:
+      summary: Update or resolve data query
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Query updated
+
+  /participants/{id}/risk:
+    post:
+      summary: Compute participant dropout risk and SHAP explanation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Risk score and top factors
+        '503':
+          description: ML service unavailable (prediction unavailable)
+
+  /trials/{id}/risk/refresh:
+    post:
+      summary: Batch recompute dropout risk for all participants
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Batch recomputation complete
+
+  /ml/model-info:
+    get:
+      summary: Retrieve ML model metadata, version, and performance metrics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Model card info and metrics
+
+  /ml/retrain:
+    post:
+      summary: Retrain model from uploaded CSV (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '202':
+          description: Retraining initiated
+
+  /trials/{id}/export/fhir:
+    get:
+      summary: Export trial data as FHIR R4 JSON Bundle
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: FHIR R4 Bundle JSON
+
+  /trials/{id}/export/cdisc:
+    get:
+      summary: Export CDISC SDTM-inspired CSV archive (DM, AE, EX, AY domains)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Zip file or CSV bundle
+
+  /alerts:
+    get:
+      summary: List system alerts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alerts list
+
+  /alerts/{id}/ack:
+    patch:
+      summary: Acknowledge an alert
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alert acknowledged
+
+  /audit:
+    get:
+      summary: Retrieve system audit log trail (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated audit logs
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserCreate:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        role:
+          type: string
+          enum: [admin, coordinator, investigator, iec_member, pv_officer, dsmb]
+        assignedTrials:
+          type: array
+          items:
+            type: string
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        assignedTrials:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+    TrialInput:
+      type: object
+      required: [title, shortCode, phase, condition, formulation, design, targetEnrollment]
+      properties:
+        title:
+          type: string
+        shortCode:
+          type: string
+        phase:
+          type: string
+        condition:
+          type: string
+        formulation:
+          type: string
+        design:
+          type: string
+        targetEnrollment:
+          type: integer
+        protocolVersion:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    ParticipantInput:
+      type: object
+      required: [subjectId, age, sex, distanceKm, ayurveda]
+      properties:
+        subjectId:
+          type: string
+          example: NT01-0042
+        age:
+          type: integer
+        sex:
+          type: string
+          enum: [Male, Female, Other]
+        distanceKm:
+          type: number
+        arm:
+          type: string
+        ayurveda:
+          type: object
+          required: [prakriti, ayurvedicDiagnosis, formulation]
+          properties:
+            prakriti:
+              type: string
+              enum: [vata, pitta, kapha, vata-pitta, pitta-kapha, vata-kapha, sama]
+            doshaImbalance:
+              type: array
+              items:
+                type: string
+            ayurvedicDiagnosis:
+              type: string
+            biomedicalDiagnosis:
+              type: string
+            formulation:
+              type: string
+            dosage:
+              type: string
+            procedure:
+              type: string
+            durationDays:
+              type: integer
+    AdverseEventInput:
+      type: object
+      required: [participantId, onsetDate, verbatimTerm, severity, serious]
+      properties:
+        participantId:
+          type: string
+        onsetDate:
+          type: string
+          format: date
+        verbatimTerm:
+          type: string
+        severity:
+          type: string
+          enum: [Mild, Moderate, Severe]
+        serious:
+          type: boolean
+        seriousCriteria:
+          type: array
+          items:
+            type: string
+        suspectedFormulation:
+          type: string

@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: nextrial-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: nextrial
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - nextrial-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  ml:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: nextrial-ml
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    volumes:
+      - ./ml-service/artifacts:/app/artifacts
+    networks:
+      - nextrial-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: nextrial-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/nextrial
+      - ML_SERVICE_URL=http://ml:8000
+      - CLIENT_URL=http://localhost:3000
+      - JWT_SECRET=super_secret_jwt_key_replace_in_production_32chars!
+      - JWT_REFRESH_SECRET=super_secret_refresh_key_replace_in_production_64chars!
+    depends_on:
+      mongo:
+        condition: service_healthy
+      ml:
+        condition: service_healthy
+    networks:
+      - nextrial-net
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5000/api/v1/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  web:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: nextrial-web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - nextrial-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mongo_data:
+
+networks:
+  nextrial-net:
+    driver: bridge
