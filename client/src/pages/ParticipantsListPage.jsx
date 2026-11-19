@@ -46,10 +46,10 @@ export default function ParticipantsListPage() {
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       return (
-        p.subjectId.toLowerCase().includes(q) ||
-        p.trialShortCode?.toLowerCase().includes(q) ||
-        p.ayurveda?.ayurvedicDiagnosis?.toLowerCase().includes(q) ||
-        p.ayurveda?.formulation?.toLowerCase().includes(q)
+        (p.subjectId || '').toLowerCase().includes(q) ||
+        (p.trialShortCode || '').toLowerCase().includes(q) ||
+        (p.ayurveda?.ayurvedicDiagnosis || '').toLowerCase().includes(q) ||
+        (p.ayurveda?.formulation || '').toLowerCase().includes(q)
       );
     }
     return true;

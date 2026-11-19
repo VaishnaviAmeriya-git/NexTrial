@@ -73,10 +73,10 @@ export default function TrialsListPage() {
   const filtered = trials.filter((tr) => {
     const q = searchTerm.toLowerCase();
     return (
-      tr.shortCode.toLowerCase().includes(q) ||
-      tr.title.toLowerCase().includes(q) ||
-      tr.condition.toLowerCase().includes(q) ||
-      tr.formulation.toLowerCase().includes(q)
+      (tr.shortCode || '').toLowerCase().includes(q) ||
+      (tr.title || '').toLowerCase().includes(q) ||
+      (tr.condition || '').toLowerCase().includes(q) ||
+      (tr.formulation || '').toLowerCase().includes(q)
     );
   });
 

@@ -65,7 +65,7 @@ export default function ParticipantDetailPage() {
         }));
       }
     } catch (e) {
-      console.warn('Risk recomputation fallback:', e);
+      console.warn('Risk recomputation fallback — ML service may be unavailable:', e.message);
     } finally {
       setRecomputingRisk(false);
     }
@@ -293,7 +293,7 @@ export default function ParticipantDetailPage() {
               {visits.map((v) => (
                 <tr key={v._id} className="hover:bg-slate-50">
                   <td className="py-2.5 px-3 font-bold font-mono text-primary">Visit {v.visitNo}</td>
-                  <td className="py-2.5 px-3 font-semibold text-text-main">{v.visitName}</td>
+                  <td className="py-2.5 px-3 font-semibold text-text-main">{v.visitName || `Visit ${v.visitNo}`}</td>
                   <td className="py-2.5 px-3 font-mono">{new Date(v.scheduledDate).toLocaleDateString()}</td>
                   <td className="py-2.5 px-3 font-mono text-[11px] text-text-muted">
                     {new Date(v.windowStart).toLocaleDateString()} - {new Date(v.windowEnd).toLocaleDateString()}

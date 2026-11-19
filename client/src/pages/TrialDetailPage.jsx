@@ -43,6 +43,8 @@ export default function TrialDetailPage() {
   const [showParticipantModal, setShowParticipantModal] = useState(false);
   const [showAEModal, setShowAEModal] = useState(false);
   const [showCTRIModal, setShowCTRIModal] = useState(false);
+  const [partError, setPartError] = useState('');
+  const [aeError, setAeError] = useState('');
 
   // New Participant Stepper Form
   const [partStep, setPartStep] = useState(1);
@@ -130,6 +132,7 @@ export default function TrialDetailPage() {
 
   const handleRegisterParticipant = async (e) => {
     e.preventDefault();
+    setPartError('');
     try {
       await apiClient.post(`/trials/${id}/participants`, partForm);
       setShowParticipantModal(false);
@@ -139,12 +142,13 @@ export default function TrialDetailPage() {
       setParticipants(res.data?.data || []);
       loadTrialData();
     } catch (err) {
-      alert(err.response?.data?.error?.message || 'Failed to register participant');
+      setPartError(err.response?.data?.error?.message || 'Failed to register participant');
     }
   };
 
   const handleLogAE = async (e) => {
     e.preventDefault();
+    setAeError('');
     try {
       await apiClient.post(`/trials/${id}/adverse-events`, aeForm);
       setShowAEModal(false);
@@ -152,7 +156,7 @@ export default function TrialDetailPage() {
       setAdverseEvents(res.data?.data || []);
       loadTrialData();
     } catch (err) {
-      alert(err.response?.data?.error?.message || 'Failed to log adverse event');
+      setAeError(err.response?.data?.error?.message || 'Failed to log adverse event');
     }
   };
 
@@ -727,6 +731,12 @@ export default function TrialDetailPage() {
               <button onClick={() => setShowParticipantModal(false)} className="text-text-muted hover:text-text-main text-lg font-bold">✕</button>
             </div>
 
+            {partError && (
+              <div className="bg-red-50 text-status-danger p-3 rounded text-xs border border-red-300">
+                {partError}
+              </div>
+            )}
+
             <form onSubmit={handleRegisterParticipant} className="space-y-4 text-xs">
               {partStep === 1 && (
                 <div className="space-y-3">
@@ -920,6 +930,12 @@ export default function TrialDetailPage() {
               <h2 className="text-lg font-bold text-primary">Log Adverse Event (AE / SAE)</h2>
               <button onClick={() => setShowAEModal(false)} className="text-text-muted hover:text-text-main text-lg font-bold">✕</button>
             </div>
+
+            {aeError && (
+              <div className="bg-red-50 text-status-danger p-3 rounded text-xs border border-red-300">
+                {aeError}
+              </div>
+            )}
 
             <form onSubmit={handleLogAE} className="space-y-3 text-xs">
               <div className="space-y-1">

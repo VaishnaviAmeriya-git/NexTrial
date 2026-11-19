@@ -27,6 +27,7 @@ export default function AdminPage() {
   // Users State
   const [users, setUsers] = useState([]);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [userError, setUserError] = useState('');
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
@@ -112,13 +113,14 @@ export default function AdminPage() {
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
+    setUserError('');
     try {
       await apiClient.post('/users', newUser);
       setShowCreateUserModal(false);
       setNewUser({ name: '', email: '', password: '', role: 'coordinator' });
       fetchUsers();
     } catch (err) {
-      alert(err.response?.data?.error?.message || 'Failed to create user');
+      setUserError(err.response?.data?.error?.message || 'Failed to create user');
     }
   };
 
@@ -451,6 +453,11 @@ export default function AdminPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px] p-4">
           <div className="bg-white rounded-[4px] border border-border shadow-lg max-w-md w-full p-6 space-y-4">
             <h2 className="text-lg font-bold text-primary">Create System User Account</h2>
+            {userError && (
+              <div className="bg-red-50 text-status-danger p-2.5 rounded text-xs border border-red-300">
+                {userError}
+              </div>
+            )}
             <form onSubmit={handleCreateUser} className="space-y-3 text-xs">
               <div className="space-y-1">
                 <label className="font-bold text-text-main">Full Name</label>

@@ -26,11 +26,7 @@ export default function AtRiskWorklistPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [trRes, partRes] = await Promise.all([
-          apiClient.get('/trials'),
-          apiClient.get('/trials'),
-        ]);
-
+        const trRes = await apiClient.get('/trials');
         const trialList = trRes.data?.data || [];
         setTrials(trialList);
 
@@ -68,9 +64,9 @@ export default function AtRiskWorklistPage() {
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       return (
-        p.subjectId.toLowerCase().includes(q) ||
-        p.trialShortCode?.toLowerCase().includes(q) ||
-        p.ayurveda?.ayurvedicDiagnosis?.toLowerCase().includes(q)
+        (p.subjectId || '').toLowerCase().includes(q) ||
+        (p.trialShortCode || '').toLowerCase().includes(q) ||
+        (p.ayurveda?.ayurvedicDiagnosis || '').toLowerCase().includes(q)
       );
     }
     return true;

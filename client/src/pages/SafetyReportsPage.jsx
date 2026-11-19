@@ -86,9 +86,9 @@ export default function SafetyReportsPage() {
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       return (
-        ae.verbatimTerm.toLowerCase().includes(q) ||
-        ae.coded?.pt?.toLowerCase().includes(q) ||
-        ae.participantId?.subjectId?.toLowerCase().includes(q)
+        (ae.verbatimTerm || '').toLowerCase().includes(q) ||
+        (ae.coded?.pt || '').toLowerCase().includes(q) ||
+        (ae.participantId?.subjectId || '').toLowerCase().includes(q)
       );
     }
     return true;

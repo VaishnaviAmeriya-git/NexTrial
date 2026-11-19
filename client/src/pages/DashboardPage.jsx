@@ -10,7 +10,8 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Bell
 } from 'lucide-react';
 import {
   BarChart,
