@@ -1,0 +1,91 @@
+{
+  "modelVersion": "v1.0-rf",
+  "algorithm": "Calibrated Random Forest (isotonic)",
+  "trainedOn": "Synthetic clinical trials dataset (N=5000, 80/20 train/test)",
+  "features": [
+    "age",
+    "sex_code",
+    "distance_km",
+    "missed_visits_so_far",
+    "visit_compliance_pct",
+    "ae_count",
+    "ae_max_severity"
+  ],
+  "metrics": {
+    "rocAuc": 0.8735,
+    "prAuc": 0.7375,
+    "brierScore": 0.0916,
+    "baselineMajorityAuc": 0.5,
+    "baselineLogisticAuc": 0.8554,
+    "confusionMatrix": [
+      [
+        766,
+        32
+      ],
+      [
+        84,
+        118
+      ]
+    ],
+    "classificationReport": {
+      "0": {
+        "precision": 0.9011764705882352,
+        "recall": 0.9598997493734336,
+        "f1-score": 0.9296116504854369,
+        "support": 798.0
+      },
+      "1": {
+        "precision": 0.7866666666666666,
+        "recall": 0.5841584158415841,
+        "f1-score": 0.6704545454545454,
+        "support": 202.0
+      },
+      "accuracy": 0.884,
+      "macro avg": {
+        "precision": 0.8439215686274509,
+        "recall": 0.7720290826075089,
+        "f1-score": 0.8000330979699912,
+        "support": 1000.0
+      },
+      "weighted avg": {
+        "precision": 0.8780454901960784,
+        "recall": 0.884,
+        "f1-score": 0.8772619152691968,
+        "support": 1000.0
+      }
+    },
+    "globalFeatureImportances": {
+      "age": 0.1298737762966341,
+      "sex_code": 0.013315442191246623,
+      "distance_km": 0.15614835077286818,
+      "missed_visits_so_far": 0.2434289722566224,
+      "visit_compliance_pct": 0.33969507011997757,
+      "ae_count": 0.05104199673499303,
+      "ae_max_severity": 0.06649639162765793
+    },
+    "permutationImportances": {
+      "age": 0.008800000000000007,
+      "sex_code": -0.002400000000000002,
+      "distance_km": 0.021200000000000017,
+      "missed_visits_so_far": 0.04820000000000004,
+      "visit_compliance_pct": 0.06619999999999995,
+      "ae_count": 0.012400000000000012,
+      "ae_max_severity": 0.012400000000000012
+    },
+    "bands": {
+      "low": {
+        "threshold": "<0.30",
+        "testSampleCount": 793
+      },
+      "medium": {
+        "threshold": "0.30-0.60",
+        "testSampleCount": 78
+      },
+      "high": {
+        "threshold": ">=0.60",
+        "testSampleCount": 129
+      }
+    }
+  },
+  "disclaimer": "Academic prototype. Model trained entirely on synthetic data. Decisions support only."
+}

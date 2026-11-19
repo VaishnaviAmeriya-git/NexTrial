@@ -183,8 +183,14 @@ def predict_risk(features: ParticipantFeatures):
             if explainer is not None:
                 try:
                     shap_vals = explainer.shap_values(X)
-                    # For binary classification TreeExplainer, handle output shape
-                    vals = shap_vals[1][0] if isinstance(shap_vals, list) else shap_vals[0]
+                    # For binary classification TreeExplainer, handle output shape (n_samples, n_features, 2) or list
+                    if isinstance(shap_vals, np.ndarray) and len(shap_vals.shape) == 3:
+                        vals = shap_vals[0, :, 1]
+                    elif isinstance(shap_vals, list) and len(shap_vals) > 1:
+                        vals = shap_vals[1][0]
+                    else:
+                        vals = shap_vals[0]
+                    
                     feature_names = ["Age", "Sex", "Travel Distance", "Missed Visits", "Visit Compliance %", "AE Count", "Max AE Severity"]
                     feat_keys = ["age", "sex", "distance_km", "missed_visits_so_far", "visit_compliance_pct", "ae_count", "ae_max_severity"]
                     

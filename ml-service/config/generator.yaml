@@ -1,0 +1,30 @@
+# Synthetic Data Generator Configuration
+# Latent logistic equation coefficients for participant dropout risk
+# Prediction observation window: strictly after Visit 3 of 8 (no label leakage)
+
+seed: 42
+sample_size: 5000
+
+features:
+  age:
+    mean: 48.0
+    std: 14.0
+    clip_min: 18.0
+    clip_max: 80.0
+  distance_km:
+    median: 12.0 # lognormal with scale exp(mu)=12
+    sigma: 0.8
+    clip_min: 0.5
+    clip_max: 250.0
+
+coefficients:
+  intercept: -2.35 # Tuned to produce ~25% overall dropout prevalence
+  distance_scale: 0.022
+  missed_visits: 0.95
+  compliance_penalty: -0.025 # Higher compliance reduces dropout
+  ae_severity: 0.45
+  ae_count: 0.20
+  age_u_shape: 0.0012 # Minimum risk around age 48; quadratic penalty away from 48
+  gender_female_adj: -0.05
+  gaussian_noise_std: 0.35
+  random_label_flip_pct: 0.06
