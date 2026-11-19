@@ -22,7 +22,14 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/login')) {
+
+    // Skip refresh for auth endpoints to avoid loops
+    const isAuthEndpoint =
+      originalRequest.url?.includes('/auth/login') ||
+      originalRequest.url?.includes('/auth/refresh') ||
+      originalRequest.url?.includes('/auth/me');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
       try {
         const refreshRes = await axios.post(
@@ -37,9 +44,12 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest);
         }
       } catch (refreshErr) {
+        // Clear stale credentials and redirect — only if not already on /login
         localStorage.removeItem('nextrial_token');
         localStorage.removeItem('nextrial_user');
-        window.location.href = '/login';
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);

@@ -34,7 +34,7 @@ function ProtectedRoute({ children, allowedRoles }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-page">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-gov-blue/20 border-t-gov-blue rounded-full animate-spin"></div>
+          <div className="w-10 h-10 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin"></div>
           <span className="text-sm font-medium text-text-muted">Loading NexTrial CTMS...</span>
         </div>
       </div>
@@ -48,7 +48,7 @@ function ProtectedRoute({ children, allowedRoles }) {
   if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-page p-6">
-        <div className="bg-white border border-border-default rounded p-8 max-w-md text-center shadow-subtle">
+        <div className="bg-white border border-border rounded p-8 max-w-md text-center shadow-sm">
           <div className="w-12 h-12 bg-red-100 text-red-700 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-xl">
             !
           </div>
@@ -58,7 +58,7 @@ function ProtectedRoute({ children, allowedRoles }) {
           </p>
           <a
             href="/dashboard"
-            className="inline-block px-4 py-2 bg-gov-blue text-white text-xs font-semibold rounded hover:bg-gov-blueDark"
+            className="inline-block px-4 py-2 bg-primary text-white text-xs font-semibold rounded hover:bg-primary-hover"
           >
             Return to Dashboard
           </a>
@@ -72,8 +72,9 @@ function ProtectedRoute({ children, allowedRoles }) {
 
 function PublicRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
+  // While checking auth, show the login page immediately (don't show blank)
   if (loading) {
-    return null;
+    return children;
   }
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;

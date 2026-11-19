@@ -13,25 +13,31 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (token) {
-        try {
-          const res = await apiClient.get('/auth/me');
-          if (res.data?.data) {
-            setUser(res.data.data);
-            localStorage.setItem('nextrial_user', JSON.stringify(res.data.data));
-          }
-        } catch (err) {
-          console.warn('Session verification failed:', err.message);
-          setUser(null);
-          setToken(null);
-          localStorage.removeItem('nextrial_token');
-          localStorage.removeItem('nextrial_user');
-        }
+      const storedToken = localStorage.getItem('nextrial_token');
+      if (!storedToken) {
+        // No token at all — go straight to login, don't hang
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+      try {
+        const res = await apiClient.get('/auth/me');
+        if (res.data?.data) {
+          setUser(res.data.data);
+          localStorage.setItem('nextrial_user', JSON.stringify(res.data.data));
+        }
+      } catch (err) {
+        // Token invalid/expired — clear everything cleanly
+        console.warn('Session verification failed, clearing credentials:', err.message);
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem('nextrial_token');
+        localStorage.removeItem('nextrial_user');
+      } finally {
+        setLoading(false);
+      }
     };
     checkAuth();
-  }, [token]);
+  }, []);
 
   const login = async (email, password) => {
     const res = await apiClient.post('/auth/login', { email, password });
