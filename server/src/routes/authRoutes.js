@@ -113,10 +113,10 @@ router.post('/login', authLimiter, async (req, res, next) => {
 // POST /auth/refresh
 router.post('/refresh', async (req, res, next) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
     if (!refreshToken) {
       return res.status(401).json({
-        error: { code: 'UNAUTHORIZED', message: 'Refresh token cookie missing' },
+        error: { code: 'UNAUTHORIZED', message: 'Refresh token missing (cookie or body)' },
       });
     }
 
