@@ -24,6 +24,7 @@ const mlRoutes = require('./routes/mlRoutes');
 const interopRoutes = require('./routes/interopRoutes');
 const alertRoutes = require('./routes/alertRoutes');
 const auditRoutes = require('./routes/auditRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use('/api/v1', mlRoutes);
 app.use('/api/v1', interopRoutes);
 app.use('/api/v1/alerts', alertRoutes);
 app.use('/api/v1/audit', auditRoutes);
+app.use('/api/v1/settings', settingsRoutes);
 
 // Central error handling
 app.use(errorHandler);
