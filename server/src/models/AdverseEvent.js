@@ -84,7 +84,7 @@ const adverseEventSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['Open', 'Reported', 'Under Review', 'Closed'],
+      enum: ['Open', 'Reported', 'Under Review', 'Coded', 'Closed'],
       default: 'Open',
     },
     deadlines: {
