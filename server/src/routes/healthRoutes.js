@@ -8,14 +8,15 @@ router.get('/health', async (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   
   let mlStatus = 'unreachable';
-  const mlUrl = process.env.ML_SERVICE_URL || 'http://localhost:8000';
-  try {
-    const mlRes = await axios.get(`${mlUrl}/health`, { timeout: 1500 });
-    if (mlRes.data && mlRes.data.status === 'ok') {
-      mlStatus = 'available';
-    }
-  } catch (err) {
-    mlStatus = 'unavailable';
+  const mlUrls = [process.env.ML_SERVICE_URL, 'http://127.0.0.1:8000', 'http://localhost:8000'].filter(Boolean);
+  for (const url of mlUrls) {
+    try {
+      const mlRes = await axios.get(`${url}/health`, { timeout: 1000 });
+      if (mlRes.data && mlRes.data.status === 'ok') {
+        mlStatus = 'available';
+        break;
+      }
+    } catch (err) {}
   }
 
   res.status(200).json({

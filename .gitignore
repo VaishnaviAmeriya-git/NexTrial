@@ -48,7 +48,19 @@ yarn-error.log*
 Thumbs.db
 
 # Client Build
+dist/
+dist-ssr/
+*.local
+
+# Database storage
+server/.db-data/
+.db-data/
+*.joblib
+
 client/dist/
 
 # Test Coverage
 coverage/
+
+.db-data/
+server/.db-data/
